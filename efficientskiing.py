@@ -6,24 +6,18 @@ map = np.random.randint(2*size, size=(size,size))
 # initialize distance matrix with -1. Alternatively use np.NaN
 distance = np.ones((size, size), dtype=np.int16)
 distance = np.negative(distance)
-Position = namedtuple('Position', 'xpos ypos')
+			
 
 Direction = Enum('Direction', 'North South East West')
 
 class Direction(Enum):
 	North = 1
-	South = 2
-	East = 3
-	West = 4
+	South = -1
+	East = 2
+	West = -2
 	
 	def opposite(self):
-		if self.name == 'North':
-			return Direction.South
-		elif self.name == 'South':
-			return Direction.North 
-		elif self.name == 'East':
-			return Direction. West
-		elif self.name =='West'
+		return Direction(-self.value)
 
 for (i in range(size)):
 	for(j in range(size)):
@@ -41,22 +35,51 @@ def depth_search(position, direction, traversed, max_distance, map, distance):
 	# return -1 if no sense in searching
 	if traversed + map[position.xpos][position.ypos] < max_distance
 		return -1
-	# return 0 if no moves possible
-	moves = get_moves(position, direction, map)
-	# recursively depth search 
 
-def get_moves(position, direction, map):
-	wall = set()
-	xmax, ymax = map.shape
-	if position.xpos <= 0:
-		wall.add(Direction.West)
-	eliif position.xpos >= xmax:
-		wall.add(Direction.East)
-	if position.ypos <=0:
-		wall.add(Direction.South)
-	elif position.ypos >= ymax:
-		wall.add(Direction.North)
+	moves = get_moves(position, direction, map)
+	# return 0 if no moves possible
+	if len(a) == 0:
+		distance[position.xpos][position.ypos] = 0
+		return 0
+	# recursively depth search 
+	max_depth = -1
+	for move in moves:
+		next_position = get_position(position, move, map)
+		depth = depth_search(next_position, move, traversed+1, max_distance, map, distance)
+		if depth > max_depth : max_depth = depth
+		
+	distance[position.xpos][position.ypos] = max_depth
+	
 	
 
+def get_moves(position, direction, map):
+	moves = set()
+	xmax, ymax = map.shape
+	xmax -= 1
+	ymax -= 1 
+	elevation = map[xpos][ypos]
+	if position.xpos < xmax and  elevation > map[xpos+1][ypos]:
+		moves.add(Direction.East)
+	if position.xpos > 0 and  elevation > map[xpos-1][ypos]:
+		moves.add(Direction.West)
+	if position.ypos > 0 and  elevation > map[xpos][ypos-1]:
+		moves.add(Direction.South)
+	if position.ypos < ymax and  elevation > map[xpos][ypos+1]:
+		moves.add(Direction.North)
+	if direction is not None:
+		moves.remove(direction.opposite)
+	return moves
+	
 
-
+def is_downhill(position, direction, map):
+	# TODO check if out of boundary?
+	xmax, ymax = map.shape
+	xpos, ypos = position
+	if Direction.North == direction:
+		return map[xpos][ypos] > map[xpos][ypos+1]
+	elif Direction.South == direction:
+		return map[xpos][ypos] > map[xpos][ypos-1]
+	elif Direction.East == direction:
+		return map[xpos][ypos] > map[xpos+1][ypos]
+	elif Direction.West == direction:
+		return map[xpos][ypos] > map[xpos-1][ypos]
