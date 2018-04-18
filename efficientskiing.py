@@ -46,7 +46,17 @@ def depth_search(position, direction, traversed, max_distance, map, distance):
 	# recursively depth search 
 
 def get_moves(position, direction, map):
-	directions = get_di
+	wall = set()
+	xmax, ymax = map.shape
+	if position.xpos <= 0:
+		wall.add(Direction.West)
+	eliif position.xpos >= xmax:
+		wall.add(Direction.East)
+	if position.ypos <=0:
+		wall.add(Direction.South)
+	elif position.ypos >= ymax:
+		wall.add(Direction.North)
+	
 
 
 
